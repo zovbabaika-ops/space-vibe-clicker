@@ -1,236 +1,172 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Clicker</title>
-    <style>
-        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { background: #0b0b1e; color: #fff; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; overflow: hidden; }
-        #starfield { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
-        .hyper { border-radius: 10px !important; animation: hd 0.4s linear infinite !important; }
-        @keyframes hd { from { transform: translateY(-100vh); } to { transform: translateY(100vh); } }
-        .container { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; padding: 40px 20px; width: 100%; max-width: 400px; }
-        #score { font-size: 3.2rem; font-weight: bold; margin: 5px 0; color: #00fff2; text-shadow: 0 0 15px rgba(0,255,242,0.4); }
-        .coin-btn { width: 160px; height: 160px; border-radius: 50%; border: none; cursor: pointer; font-size: 4.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px #00fff2; transition: transform 0.05s; margin: auto 0; }
-        .coin-btn:active { transform: scale(0.9); }
-        .shop-panel { position: fixed; bottom: -100%; left: 0; right: 0; background: #0f0f2d; border-top: 3px solid #00fff2; border-radius: 20px 20px 0 0; padding: 20px; transition: bottom 0.3s ease; z-index: 1000; max-height: 60vh; display: flex; flex-direction: column; }
-        .shop-panel.open { bottom: 0; }
-        .tab-btn { flex: 1; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,255,255,0.2); color: #8a8ab0; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .tab-btn.active { background: rgba(0,255,242,0.15); border-color: #00fff2; color: #00fff2; }
-        .tab-content { display: none; flex-direction: column; gap: 8px; overflow-y: auto; margin-top: 10px; }
-        .tab-content.active { display: flex; }
-        .shop-item { width: 100%; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,255,255,0.2); color: #fff; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .shop-item:disabled { opacity: 0.3; }
-        #chest { position: fixed; font-size: 2.5rem; cursor: pointer; z-index: 98; display: none; }
-        .modal { position: fixed; inset: 0; background: rgba(5,5,20,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        #audio-blocker { position: fixed; inset: 0; background: #0b0b1e; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #start-audio-btn { padding: 15px 30px; font-size: 1.2rem; background: #00fff2; border: none; font-weight: bold; border-radius: 50px; box-shadow: 0 0 20px #00fff2; margin-top: 20px; color: #000; cursor: pointer; }
-        .floating-text { position: fixed; pointer-events: none; font-weight: bold; font-size: 1.5rem; animation: fu 0.5s ease-out forwards; z-index: 9999; }
-        @keyframes fu { 0% { transform: translate(-50%, -50%); opacity: 1; } 100% { transform: translate(-50%, -80px); opacity: 0; } }
-    </style>
-    <link id="favicon" rel="icon" href='data:image/svg+xml,<svg xmlns="http://w3.org" viewBox="0 0 100 100"><text y=".9em" font-size="90">🪙</text></svg>'>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cosmic Neon Clicker Ultimate</title>
+<style>
+:root{--accent:#00fff2}
+*{box-sizing:border-box;font-family:Arial;margin:0;padding:0}
+body{background:#0b0b1e;color:#fff;overflow:hidden;text-align:center}
+#stars{position:fixed;inset:0;z-index:-2}
+.star{position:absolute;background:#fff;border-radius:50%;width:2px;height:2px;animation:twinkle 3s infinite alternate}
+.hyper .star{width:2px;height:40px;border-radius:2px;animation:warp .5s linear infinite}
+@keyframes twinkle{from{opacity:.2}to{opacity:1}}
+@keyframes warp{from{transform:translateY(-50px)}to{transform:translateY(100vh)}}
+#top{padding:15px}
+#score{font-size:46px;color:var(--accent);text-shadow:0 0 20px var(--accent)}
+#coin{width:220px;height:220px;border-radius:50%;border:none;font-size:90px;cursor:pointer;color:#fff;
+background:radial-gradient(circle,var(--accent),#1d1d35);box-shadow:0 0 30px var(--accent),0 0 80px var(--accent);transition:.12s}
+#coin:hover{transform:scale(1.05)} #coin:active{transform:scale(.9)}
+.panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:15px;margin:10px auto;width:min(95vw,650px)}
+button{padding:10px 14px;border:none;border-radius:10px;background:#202040;color:#fff;margin:4px;cursor:pointer}
+.shopbtn{display:block;width:100%;margin-top:8px}
+.float{position:fixed;pointer-events:none;font-weight:bold;animation:up .7s forwards}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+#music{position:fixed;top:10px;right:10px}
+#chest{position:fixed;font-size:60px;cursor:pointer;animation:float 4s infinite alternate}
+@keyframes float{from{transform:translate(0,0)}to{transform:translate(25px,-20px)}}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
+#box{background:#15152d;padding:25px;border-radius:20px;border:1px solid var(--accent)}
+.pulse{animation:pulse .15s infinite alternate}
+@keyframes pulse{from{filter:hue-rotate(0)}to{filter:hue-rotate(360deg)}}
+</style>
 </head>
 <body>
+<div id="stars"></div>
 
-    <div id="audio-blocker">
-        <h2 style="color:#00fff2; text-align:center;">БОРТОВОЙ КОМПЬЮТЕР ШАТТЛА</h2>
-        <p style="color:#8a8ab0; text-align:center;">Нажмите для активации аудиосистем мобильного устройства</p>
-        <button id="start-audio-btn">ЗАПУСТИТЬ ИГРУ 🚀</button>
-    </div>
+<audio id="bgMusic" loop><source src="https://html5gametutorial.com" type="audio/mpeg"></audio>
+<button id="music">🔊</button>
 
-    <audio id="bgMusic" loop playsinline><source src="https://html5gametutorial.com" type="audio/mpeg"></audio>
-    <div id="starfield"></div>
-    <div id="chest">🎁</div>
+<div id="top" class="panel">
+<div id="score">0</div>
+<div id="rank">Космический странник</div>
+<div id="prestigeText">Престиж: 0</div>
+<div>Сила клика: <span id="clickPowerText">1</span> | Доход: <span id="incomeText">0</span>/сек | x<span id="multText">1</span></div>
+</div>
 
-    <div class="modal" id="quizModal">
-        <div style="background:#0f0f32; border:2px solid #ff00ff; box-shadow:0 0 20px #ff00ff; padding:25px; border-radius:16px; text-align:center; width:280px;">
-            <h3 style="color:#ff00ff; margin:0;">Взлом сундука! (<span id="timer" style="color:#ff0055;">10</span>с)</h3>
-            <div id="task" style="font-size:1.8rem; font-weight:bold; margin:15px 0; color:#00fff2;">5 + 5</div>
-            <input type="number" id="ansInput" style="width:100%; padding:8px; text-align:center; background:#000; border:1px solid #00fff2; color:#fff; font-size:1.2rem; border-radius:6px; outline:none;"><br><br>
-            <button id="submitAns" style="background:#ff00ff; border:none; color:#fff; padding:10px; font-weight:bold; border-radius:6px; width:100%;">ОТКРЫТЬ</button>
-        </div>
-    </div>
+<button id="coin">🪙</button>
 
-    <div class="shop-panel" id="shopPanel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0; color:#00fff2;">🛒 Магазин Шаттла</h3>
-            <button id="closeShopBtn" style="background:none; border:none; color:#ff0055; font-size:1.5rem; font-weight:bold;">✕</button>
-        </div>
-        <div style="display:flex; gap:8px; margin-bottom:5px;">
-            <button class="tab-btn active" id="tabUpgradesBtn">⚡ АПГРЕЙДЫ</button>
-            <button class="tab-btn" id="tabSkinsBtn">🎨 СКИНЫ</button>
-        </div>
-        <div class="tab-content active" id="tabUpgrades">
-            <button class="shop-item" id="buyClick"><span>Сила клика (+1)</span> <b id="costClick">50</b></button>
-            <button class="shop-item" id="buyAuto"><span>Автоклик (+1/с)</span> <b id="costAuto">100</b></button>
-            <button class="shop-item" id="buyShip"><span>🚀 Корабль (+100/с)</span> <b id="costShip">5000</b></button>
-            <button class="shop-item" id="buyGen"><span>⚛️ Генератор (+250)</span> <b id="costGen">50000</b></button>
-            <button class="shop-item" id="buyHole"><span>🕳️ Черная дыра (+15к)</span> <b id="costHole">500000</b></button>
-        </div>
-        <div class="tab-content" id="tabSkins">
-            <button class="shop-item" id="skin1"><span>🪙 Базовый скин</span> <b>Выбрано</b></button>
-            <button class="shop-item" id="skin2"><span>☀️ Плазменная звезда</span> <b id="costSkin2">100000</b></button>
-            <button class="shop-item" id="skin3"><span>🌀 Антиматерия</span> <b id="costSkin3">500000</b></button>
-        </div>
-    </div>
+<div class="panel">
+<button id="prestigeBtn">Перерождение</button>
+<button class="shopbtn" id="buyClick">Сила клика (+1) - <span id="p1">50</span></button>
+<button class="shopbtn" id="buyAuto">Автоклик (+1/сек) - <span id="p2">100</span></button>
+<button class="shopbtn" id="buyShip">Корабль (+100/сек) - <span id="p3">5000</span></button>
+<button class="shopbtn" id="buyGen">Генератор (+250 клика) - <span id="p4">50000</span></button>
+<button class="shopbtn" id="buyHole">Черная дыра (+15000/сек) - <span id="p5">500000</span></button>
+<h3>Скины</h3>
+<button id="skin0">🪙 Базовый</button>
+<button id="skin1">☀️ Плазменная звезда 100000</button>
+<button id="skin2">🌀 Антиматерия 500000</button>
+</div>
 
-    <div class="container">
-        <div>
-            <div id="rank" style="color:#ffd700; font-weight:bold;">Космический странник</div>
-            <div style="color:#ffd700; font-size:0.85rem;">Престиж Ур. <span id="prestigeLevel">0</span> (x<span id="multiplier">1</span>)</div>
-            <div id="score">0</div>
-            <div class="stats-info">В секунду: +<span id="pps">0</span> | Клик: +<span id="cpc">1</span></div>
-        </div>
+<div id="modal">
+<div id="box">
+<h2>Сундук</h2>
+<div id="task"></div>
+<input id="ans" type="number">
+<div id="timer">10</div>
+<button id="open">Открыть</button>
+</div>
+</div>
 
-        <button class="coin-btn" id="coinBtn">🪙</button>
-        <div id="info-box"></div>
-
-        <div style="width:100%; display:flex; flex-direction:column; gap:10px;">
-            <button id="prestigeBtn" disabled style="padding:10px; background:transparent; border:1px solid #ffd700; color:#ffd700; border-radius:10px; font-weight:bold;">🌌 Перерождение (Цена: 1М)</button>
-            <button id="openShopBtn" style="padding:12px; background:rgba(0,255,242,0.1); border:2px solid #00fff2; color:#00fff2; font-weight:bold; border-radius:50px; box-shadow:0 0 10px rgba(0,255,242,0.2);">🛒 МАГАЗИН УЛУЧШЕНИЙ</button>
-        </div>
-    </div>
-
-    <script>
-        let score = 0; let totalClicks = 0; let clickPower = 1;
-        let autoClickers = 0; let ships = 0; let generators = 0; let blackHoles = 0; let prestige = 0;
-        let costClick = 50; let costAuto = 100; let costShip = 5000; let costGen = 50000; let costHole = 500000;
-        let hasSkin2 = false; let hasSkin3 = false; let currentSkin = '🪙';
-        let easterEggTriggered = false; let quantumActive = false; let audioCtx = null; let musicPlaying = false;
-
-        const colors = {
-            0: { coin: 'radial-gradient(circle, #00fff2, #00b8ff)', shadow: '0 0 25px #00fff2', text: '#00fff2' },
-            1: { coin: 'radial-gradient(circle, #ff0055, #b3003b)', shadow: '0 0 25px #ff0055', text: '#ff0055' },
-            2: { coin: 'radial-gradient(circle, #aa00ff, #660099)', shadow: '0 0 25px #aa00ff', text: '#aa00ff' }
-        };
-
-        function getMultiplier() { return Math.max(1, prestige * 5); }
-        function getIncome() { return (autoClickers * 1 + ships * 100 + blackHoles * 15000) * getMultiplier(); }
-        function getClickValue() { return (quantumActive ? clickPower * 10 : clickPower) * getMultiplier(); }
-
-        function updateRank() {
-            let r = "Космический странник";
-            if (score >= 10000) r = "Капитан шаттла";
-            if (score >= 100000) r = "Исследователь пустоты";
-            if (score >= 1000000 || prestige > 0) r = "Лорд Галактики";
-            if (prestige >= 2) r = "Повелитель Вселенной";
-            document.getElementById('rank').textContent = r;
-        }
-
-        const sf = document.getElementById('starfield');
-        for(let i=0; i<30; i++) {
-            let s = document.createElement('div'); s.className = 'star';
-            s.style.width = s.style.height = Math.random() * 3 + 1 + 'px';
-            s.style.left = Math.random() * 100 + 'vw'; s.style.top = Math.random() * 100 + 'vh';
-            sf.appendChild(s);
-        }
-        
-
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-
-    const music = document.getElementById("bgMusic");
-
-    if (!musicPlaying) {
-        music.volume = 0.15;
-
-        music.play()
-            .then(() => {
-                musicPlaying = true;
-            })
-            .catch(() => {});
-    }
+<script>
+const S={score:0,prestige:0,clicks:0,clickPower:1,auto:0,ship:0,hole:0,
+cp:50,ap:100,sp:5000,gp:50000,hp:500000,skin:0,skins:[0],egg:false,quantum:false,total:0};
+Object.assign(S,JSON.parse(localStorage.cosmicSave||"{}"));
+const save=()=>localStorage.cosmicSave=JSON.stringify(S);
+const mult=()=>Math.max(1,S.prestige*5||1);
+const income=()=>S.auto+S.ship*100+S.hole*15000;
+function accent(){return S.quantum?"#ffff00":S.prestige==0?"#00fff2":S.prestige==1?"#ff0055":"#aa00ff";}
+function rank(){if(S.prestige>=2)return"Повелитель Вселенной";if(S.prestige>=1||S.total>=1e6)return"Лорд Галактики";if(S.total>=1e5)return"Исследователь пустоты";if(S.total>=1e4)return"Капитан шаттла";return"Космический странник";}
+function sound(c){let a=new(window.AudioContext||webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=c;g.gain.value=.06;o.connect(g);g.connect(a.destination);o.start();o.frequency.exponentialRampToValueAtTime(c*1.5,a.currentTime+.08);o.stop(a.currentTime+.1);}
+function ui(){
+document.documentElement.style.setProperty("--accent",accent());
+score.textContent=Math.floor(S.score).toLocaleString();
+rank.innerText=rank();
+prestigeText.innerText="Престиж: "+S.prestige;
+clickPowerText.innerText=S.clickPower;
+incomeText.innerText=(income()*mult()).toLocaleString();
+multText.innerText=mult();
+[p1,p2,p3,p4,p5].forEach((e,i)=>e.textContent=[S.cp,S.ap,S.sp,S.gp,S.hp][i].toLocaleString());
+let emoji=["🪙","☀️","🌀"][S.skin];
+coin.innerText=emoji;
+if(S.skin==1)coin.style.background="radial-gradient(circle,#ffae00,#ff4500)";
+else if(S.skin==2)coin.style.background="radial-gradient(circle,#2255ff,#000033)";
+else coin.style.background=`radial-gradient(circle,${accent()},#1d1d35)`;
+coin.style.boxShadow=`0 0 30px ${accent()},0 0 80px ${accent()}`;
+save();
 }
+for(let i=0;i<120;i++){let s=document.createElement("div");s.className="star";s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";stars.appendChild(s);}
 
-document.getElementById('start-audio-btn').onclick = () => {
-    initAudio();
-    document.getElementById('audio-blocker').style.display = 'none';
+let musicStarted=false;
+coin.onclick=e=>{
+if(!musicStarted){musicStarted=true;bgMusic.volume=0;bgMusic.play().catch(()=>{});let f=setInterval(()=>{if(bgMusic.volume<.4)bgMusic.volume+=.05;else clearInterval(f)},100);}
+S.clicks++;
+let crit=Math.random()<0.1;
+let gain=S.clickPower*mult()*(S.quantum?10:1)*(crit?5:1);
+S.score+=gain;S.total+=gain;
+sound(crit?1100:700);
+let d=document.createElement("div");
+d.className="float";d.style.left=e.clientX+"px";d.style.top=e.clientY+"px";
+d.style.color=crit?"gold":accent();d.style.fontSize=crit?"34px":"24px";
+d.innerText=(crit?"CRIT +":"+")+Math.floor(gain);
+document.body.appendChild(d);setTimeout(()=>d.remove(),700);
+
+if(S.clicks===777&&!S.egg){S.egg=true;S.score+=7777;alert("Удача Галактики! +7777 очков!");}
+ui();
 };
 
-function playSound(isCrit = false) {
-    if (!audioCtx) return;
+setInterval(()=>{S.score+=income()*mult();S.total+=income()*mult();ui();},1000);
 
-    try {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+function buy(costKey,priceKey,inc){if(S.score>=S[priceKey]){S.score-=S[priceKey];inc();S[priceKey]=Math.floor(S[priceKey]*1.35);ui();}}
+buyClick.onclick=()=>buy("clickPower","cp",()=>S.clickPower++);
+buyAuto.onclick=()=>buy("auto","ap",()=>S.auto++);
+buyShip.onclick=()=>buy("ship","sp",()=>S.ship++);
+buyGen.onclick=()=>buy("clickPower","gp",()=>S.clickPower+=250);
+buyHole.onclick=()=>buy("hole","hp",()=>S.hole++);
 
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(
-            isCrit ? 1100 : 550,
-            audioCtx.currentTime
-        );
-
-        gain.gain.setValueAtTime(
-            0.04,
-            audioCtx.currentTime
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioCtx.currentTime + 0.08
-        );
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.08);
-
-    } catch (e) {}
+prestigeBtn.onclick=()=>{
+if(S.score<1e6)return alert("Нужно 1 000 000 очков");
+if(confirm("Сбросить прогресс ради множителя?")){
+S.score=0;S.clickPower=1;S.auto=0;S.ship=0;S.hole=0;S.cp=50;S.ap=100;S.sp=5000;S.gp=50000;S.hp=500000;S.prestige++;ui();
 }
+};
 
-function updateUI() {
-    document.getElementById('score').textContent = Math.floor(score);
-    document.getElementById('pps').textContent = Math.floor(getIncome());
-    document.getElementById('cpc').textContent = Math.floor(getClickValue());
+function buySkin(id,cost){if(!S.skins.includes(id)){if(S.score<cost)return;S.score-=cost;S.skins.push(id);}S.skin=id;ui();}
+skin0.onclick=()=>buySkin(0,0); skin1.onclick=()=>buySkin(1,100000); skin2.onclick=()=>buySkin(2,500000);
 
-    document.getElementById('prestigeLevel').textContent = prestige;
-    document.getElementById('multiplier').textContent = getMultiplier();
+music.onclick=()=>{if(bgMusic.paused){bgMusic.play();music.innerText="🔊"}else{bgMusic.pause();music.innerText="🔇"}}
 
-    updateRank();
-
-    const level = prestige >= 2 ? 2 : prestige;
-    const coin = document.getElementById('coinBtn');
-
-    coin.textContent = currentSkin;
-
-    if (!quantumActive) {
-        if (currentSkin === '🪙') {
-            coin.style.background = colors[level].coin;
-            coin.style.boxShadow = colors[level].shadow;
-        }
-        else if (currentSkin === '☀️') {
-            coin.style.background =
-                'radial-gradient(circle,#ff9900,#ff5500)';
-            coin.style.boxShadow = '0 0 25px #ff5500';
-        }
-        else if (currentSkin === '🌀') {
-            coin.style.background =
-                'radial-gradient(circle,#0055ff,#000033)';
-            coin.style.boxShadow = '0 0 25px #0055ff';
-        }
-    }
-
-    document.getElementById('score').style.color =
-        colors[level].text;
-
-    let icon = '🪙';
-
-    if (currentSkin === '☀️') icon = '☀️';
-    if (currentSkin === '🌀') icon = '🌀';
-    if (prestige === 1) icon = '🔥';
-    if (prestige >= 2) icon = '🌌';
-
-    document.getElementById('favicon').href =
-        `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icon}</text></svg>`;
+let answer=0,chestTimer;
+function spawnChest(){
+let old=document.getElementById("chest");if(old)old.remove();
+let c=document.createElement("div");c.id="chest";c.textContent="🎁";
+c.style.left=Math.random()*(innerWidth-80)+"px";c.style.top=Math.random()*(innerHeight-80)+"px";
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),15000);
+c.onclick=()=>{
+modal.style.display="flex";
+let a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*20)+1,plus=Math.random()>.5;
+answer=plus?a+b:a-b;task.innerText=`${a} ${plus?"+":"-"} ${b} = ?`;
+let t=10;timer.innerText=t;
+clearInterval(chestTimer);
+chestTimer=setInterval(()=>{timer.innerText=--t;if(t<=0){clearInterval(chestTimer);modal.style.display="none";}},1000);
+open.onclick=()=>{
+clearInterval(chestTimer);
+if(Number(ans.value)===answer){
+if(Math.random()>.5){S.score+=income()*50+5000;alert("Сундук взломан!");}
+else{
+S.quantum=true;coin.classList.add("pulse");stars.classList.add("hyper");
+setTimeout(()=>{S.quantum=false;coin.classList.remove("pulse");stars.classList.remove("hyper");ui();},15000);
 }
-        function popText(x, y, txt, c = null) {
+}
+modal.style.display="none";c.remove();ui();
+};
+};
+}
+setInterval(spawnChest,120000);
+ui();
+</script>
+</body>
+</html>
