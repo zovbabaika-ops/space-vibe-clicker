@@ -11,7 +11,7 @@
         .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; }
         .hyper { border-radius: 10px !important; animation: hd 0.4s linear infinite !important; }
         @keyframes hd { from { transform: translateY(-100vh); } to { transform: translateY(100vh); } }
-        .container { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; padding: 40px 20px; width: 100%; max-width: 400px; text-align: center; }
+        .container { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; padding: 40px 20px; width: 100%; max-width: 400px; }
         #score { font-size: 3.2rem; font-weight: bold; margin: 5px 0; color: #00fff2; text-shadow: 0 0 15px rgba(0,255,242,0.4); }
         .coin-btn { width: 160px; height: 160px; border-radius: 50%; border: none; cursor: pointer; font-size: 4.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px #00fff2; transition: transform 0.05s; margin: auto 0; }
         .coin-btn:active { transform: scale(0.9); }
@@ -26,7 +26,7 @@
         #chest { position: fixed; font-size: 2.5rem; cursor: pointer; z-index: 98; display: none; }
         .modal { position: fixed; inset: 0; background: rgba(5,5,20,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; }
         #audio-blocker { position: fixed; inset: 0; background: #0b0b1e; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #start-audio-btn { padding: 15px 30px; font-size: 1.2rem; background: #00fff2; border: none; font-weight: bold; border-radius: 50px; box-shadow: 0 0 20px #00fff2; margin-top: 20px; color: #000; }
+        #start-audio-btn { padding: 15px 30px; font-size: 1.2rem; background: #00fff2; border: none; font-weight: bold; border-radius: 50px; box-shadow: 0 0 20px #00fff2; margin-top: 20px; color: #000; cursor: pointer; }
         .floating-text { position: fixed; pointer-events: none; font-weight: bold; font-size: 1.5rem; animation: fu 0.5s ease-out forwards; z-index: 9999; }
         @keyframes fu { 0% { transform: translate(-50%, -50%); opacity: 1; } 100% { transform: translate(-50%, -80px); opacity: 0; } }
     </style>
@@ -40,9 +40,7 @@
         <button id="start-audio-btn">ЗАПУСТИТЬ ИГРУ 🚀</button>
     </div>
 
-    <audio id="bgMusic" loop playsinline>
-        <source src="https://zvukipro.com/uploads/files/2020-01/1579548242_valcos-a-new-light.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgMusic" loop playsinline><source src="https://html5gametutorial.com" type="audio/mpeg"></audio>
     <div id="starfield"></div>
     <div id="chest">🎁</div>
 
@@ -128,101 +126,111 @@
             s.style.left = Math.random() * 100 + 'vw'; s.style.top = Math.random() * 100 + 'vh';
             sf.appendChild(s);
         }
-      else { m.pause(); document.getElementById('musicToggle').textContent = "🔇"; }
-    };
-
-    let ct; let ra = 0; const ce = document.getElementById('chest');
-    
-    // Появление сундука раз в 120 секунд
-    setInterval(() => { 
-        ce.style.display = 'block'; 
-        ce.style.left = Math.random() * 70 + 15 + 'vw'; 
-        ce.style.top = Math.random() * 50 + 25 + 'vh'; 
-    }, 120000);
-
-    // Клик по сундуку
-    ce.onclick = () => {
-        ce.style.display = 'none'; 
-        let n1 = Math.floor(Math.random() * 20) + 5; 
-        let n2 = Math.floor(Math.random() * 15) + 2;
-        ra = n1 + n2; 
-        document.getElementById('task').textContent = n1 + " + " + n2 + " = ?";
-        let tl = 10; 
-        document.getElementById('timer').textContent = tl; 
-        document.getElementById('quizModal').style.display = 'flex';
         
-        clearInterval(ct);
-        ct = setInterval(() => { 
-            tl--; 
-            document.getElementById('timer').textContent = tl; 
-            if(tl <= 0) { 
-                clearInterval(ct); 
-                document.getElementById('quizModal').style.display = 'none'; 
-            } 
-        }, 1000);
-    };
-
-    // Проверка ответа
-    document.getElementById('submitAns').onclick = () => {
-        clearInterval(ct); 
-        document.getElementById('quizModal').style.display = 'none';
-        if(parseInt(document.getElementById('ansInput').value) === ra) {
-            if(Math.random() > 0.5) { 
-                let b = Math.max(500, getIncome() * 50); 
-                score += b; 
-                document.getElementById('info-box').textContent = "+" + b + " очков!"; 
-            } else { 
-                quantumActive = true; 
-                document.getElementById('info-box').textContent = "КВАНТОВЫЙ ВЗРЫВ! Клик x10!"; 
-                document.querySelectorAll('.star').forEach(s => s.classList.add('hyper')); 
-                setTimeout(() => { 
-                    quantumActive = false; 
-                    document.querySelectorAll('.star').forEach(s => s.classList.remove('hyper')); 
-                    updateUI(); 
-                }, 15000); 
-            }
-        } else { 
-            document.getElementById('info-box').textContent = "Взлом провален!"; 
-        }
-        updateUI(); 
-        saveGame();
-    };
-
-    // Загрузка сейвов
-    function loadGame() {
-        const saved = localStorage.getItem('spaceVibeMobiFinalV3');
-        if (saved) {
-            const d = JSON.parse(saved); 
-            score = d.score || 0; 
-            totalClicks = d.totalClicks || 0; 
-            clickPower = d.clickPower || 1;
-            autoClickers = d.autoClickers || 0; 
-            ships = d.ships || 0; 
-            generators = d.generators || 0; 
-            blackHoles = d.blackHoles || 0; 
-            prestige = d.prestige || 0;
-            costClick = d.costClick || 50; 
-            costAuto = d.costAuto || 100; 
-            costShip = d.costShip || 5000; 
-            costGen = d.costGen || 50000; 
-            costHole = d.costHole || 500000;
-            hasSkin2 = d.hasSkin2 || false; 
-            hasSkin3 = d.hasSkin3 || false; 
-            currentSkin = d.currentSkin || '🪙'; 
-            easterEggTriggered = d.easterEggTriggered || false;
-        }
-        updateUI();
-    }
-
-    // Сохранение прогресса
-    function saveGame() {
-        const d = { score, totalClicks, clickPower, autoClickers, ships, generators, blackHoles, prestige, costClick, costAuto, costShip, costGen, costHole, hasSkin2, hasSkin3, currentSkin, easterEggTriggered };
-        localStorage.setItem('spaceVibeMobiFinalV3', JSON.stringify(d));
-    }
-
-    // Таймер автодохода
-    setInterval(() => { score += getIncome() / 10; updateUI(); }, 100);
-    loadGame();
 
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    const music = document.getElementById("bgMusic");
+
+    if (!musicPlaying) {
+        music.volume = 0.15;
+
+        music.play()
+            .then(() => {
+                musicPlaying = true;
+            })
+            .catch(() => {});
+    }
+}
+
+document.getElementById('start-audio-btn').onclick = () => {
+    initAudio();
+    document.getElementById('audio-blocker').style.display = 'none';
+};
+
+function playSound(isCrit = false) {
+    if (!audioCtx) return;
+
+    try {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(
+            isCrit ? 1100 : 550,
+            audioCtx.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            0.04,
+            audioCtx.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioCtx.currentTime + 0.08
+        );
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+
+    } catch (e) {}
+}
+
+function updateUI() {
+    document.getElementById('score').textContent = Math.floor(score);
+    document.getElementById('pps').textContent = Math.floor(getIncome());
+    document.getElementById('cpc').textContent = Math.floor(getClickValue());
+
+    document.getElementById('prestigeLevel').textContent = prestige;
+    document.getElementById('multiplier').textContent = getMultiplier();
+
+    updateRank();
+
+    const level = prestige >= 2 ? 2 : prestige;
+    const coin = document.getElementById('coinBtn');
+
+    coin.textContent = currentSkin;
+
+    if (!quantumActive) {
+        if (currentSkin === '🪙') {
+            coin.style.background = colors[level].coin;
+            coin.style.boxShadow = colors[level].shadow;
+        }
+        else if (currentSkin === '☀️') {
+            coin.style.background =
+                'radial-gradient(circle,#ff9900,#ff5500)';
+            coin.style.boxShadow = '0 0 25px #ff5500';
+        }
+        else if (currentSkin === '🌀') {
+            coin.style.background =
+                'radial-gradient(circle,#0055ff,#000033)';
+            coin.style.boxShadow = '0 0 25px #0055ff';
+        }
+    }
+
+    document.getElementById('score').style.color =
+        colors[level].text;
+
+    let icon = '🪙';
+
+    if (currentSkin === '☀️') icon = '☀️';
+    if (currentSkin === '🌀') icon = '🌀';
+    if (prestige === 1) icon = '🔥';
+    if (prestige >= 2) icon = '🌌';
+
+    document.getElementById('favicon').href =
+        `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icon}</text></svg>`;
+}
+        function popText(x, y, txt, c = null) {
