@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cosmic Neon Clicker Ultimate</title>
+<style>
+:root{--accent:#00fff2}
+*{box-sizing:border-box;font-family:Arial;margin:0;padding:0}
+body{background:#0b0b1e;color:#fff;overflow:hidden;text-align:center}
+#stars{position:fixed;inset:0;z-index:-2}
+.star{position:absolute;background:#fff;border-radius:50%;width:2px;height:2px;animation:twinkle 3s infinite alternate}
+.hyper .star{width:2px;height:40px;border-radius:2px;animation:warp .5s linear infinite}
+@keyframes twinkle{from{opacity:.2}to{opacity:1}}
+@keyframes warp{from{transform:translateY(-50px)}to{transform:translateY(100vh)}}
+#top{padding:15px}
+#score{font-size:46px;color:var(--accent);text-shadow:0 0 20px var(--accent)}
+#coin{width:220px;height:220px;border-radius:50%;border:none;font-size:90px;cursor:pointer;color:#fff;
+background:radial-gradient(circle,var(--accent),#1d1d35);box-shadow:0 0 30px var(--accent),0 0 80px var(--accent);transition:.12s}
+#coin:hover{transform:scale(1.05)} #coin:active{transform:scale(.9)}
+.panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:15px;margin:10px auto;width:min(95vw,650px)}
+button{padding:10px 14px;border:none;border-radius:10px;background:#202040;color:#fff;margin:4px;cursor:pointer}
+.shopbtn{display:block;width:100%;margin-top:8px}
+.float{position:fixed;pointer-events:none;font-weight:bold;animation:up .7s forwards}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+#music{position:fixed;top:10px;right:10px}
+#chest{position:fixed;font-size:60px;cursor:pointer;animation:float 4s infinite alternate}
+@keyframes float{from{transform:translate(0,0)}to{transform:translate(25px,-20px)}}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
+#box{background:#15152d;padding:25px;border-radius:20px;border:1px solid var(--accent)}
+.pulse{animation:pulse .15s infinite alternate}
+@keyframes pulse{from{filter:hue-rotate(0)}to{filter:hue-rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+
+<audio id="bgMusic" loop><source src="https://zvukipro.com/uploads/files/2020-01/1579548242_valcos-a-new-light.mp3" type="audio/mpeg"></audio>
+<button id="music">🔊</button>
+
+<div id="top" class="panel">
+<div id="score">0</div>
+<div id="rank">Космический странник</div>
+<div id="prestigeText">Престиж: 0</div>
+<div>Сила клика: <span id="clickPowerText">1</span> | Доход: <span id="incomeText">0</span>/сек | x<span id="multText">1</span></div>
+</div>
+
+<button id="coin">🪙</button>
+
+<div class="panel">
+<button id="prestigeBtn">Перерождение</button>
+<button class="shopbtn" id="buyClick">Сила клика (+1) - <span id="p1">50</span></button>
+<button class="shopbtn" id="buyAuto">Автоклик (+1/сек) - <span id="p2">100</span></button>
+<button class="shopbtn" id="buyShip">Корабль (+100/сек) - <span id="p3">5000</span></button>
+<button class="shopbtn" id="buyGen">Генератор (+250 клика) - <span id="p4">50000</span></button>
+<button class="shopbtn" id="buyHole">Черная дыра (+15000/сек) - <span id="p5">500000</span></button>
+<h3>Скины</h3>
+<button id="skin0">🪙 Базовый</button>
+<button id="skin1">☀️ Плазменная звезда 100000</button>
+<button id="skin2">🌀 Антиматерия 500000</button>
+</div>
+
+<div id="modal">
+<div id="box">
+<h2>Сундук</h2>
+<div id="task"></div>
+<input id="ans" type="number">
+<div id="timer">10</div>
+<button id="open">Открыть</button>
+</div>
+</div>
+
+<script>
+const S={score:0,prestige:0,clicks:0,clickPower:1,auto:0,ship:0,hole:0,
+cp:50,ap:100,sp:5000,gp:50000,hp:500000,skin:0,skins:[0],egg:false,quantum:false,total:0};
+Object.assign(S,JSON.parse(localStorage.cosmicSave||"{}"));
+const save=()=>localStorage.cosmicSave=JSON.stringify(S);
+const mult=()=>Math.max(1,S.prestige*5||1);
+const income=()=>S.auto+S.ship*100+S.hole*15000;
+function accent(){return S.quantum?"#ffff00":S.prestige==0?"#00fff2":S.prestige==1?"#ff0055":"#aa00ff";}
+function rank(){if(S.prestige>=2)return"Повелитель Вселенной";if(S.prestige>=1||S.total>=1e6)return"Лорд Галактики";if(S.total>=1e5)return"Исследователь пустоты";if(S.total>=1e4)return"Капитан шаттла";return"Космический странник";}
+function sound(c){let a=new(window.AudioContext||webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.frequency.value=c;g.gain.value=.06;o.connect(g);g.connect(a.destination);o.start();o.frequency.exponentialRampToValueAtTime(c*1.5,a.currentTime+.08);o.stop(a.currentTime+.1);}
+function ui(){
+document.documentElement.style.setProperty("--accent",accent());
+score.textContent=Math.floor(S.score).toLocaleString();
+rank.innerText=rank();
+prestigeText.innerText="Престиж: "+S.prestige;
+clickPowerText.innerText=S.clickPower;
+incomeText.innerText=(income()*mult()).toLocaleString();
+multText.innerText=mult();
+[p1,p2,p3,p4,p5].forEach((e,i)=>e.textContent=[S.cp,S.ap,S.sp,S.gp,S.hp][i].toLocaleString());
+let emoji=["🪙","☀️","🌀"][S.skin];
+coin.innerText=emoji;
+if(S.skin==1)coin.style.background="radial-gradient(circle,#ffae00,#ff4500)";
+else if(S.skin==2)coin.style.background="radial-gradient(circle,#2255ff,#000033)";
+else coin.style.background=`radial-gradient(circle,${accent()},#1d1d35)`;
+coin.style.boxShadow=`0 0 30px ${accent()},0 0 80px ${accent()}`;
+save();
+}
+for(let i=0;i<120;i++){let s=document.createElement("div");s.className="star";s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";stars.appendChild(s);}
+
+let musicStarted=false;
+coin.onclick=e=>{
+if(!musicStarted){musicStarted=true;bgMusic.volume=0;bgMusic.play().catch(()=>{});let f=setInterval(()=>{if(bgMusic.volume<.4)bgMusic.volume+=.05;else clearInterval(f)},100);}
+S.clicks++;
+let crit=Math.random()<0.1;
+let gain=S.clickPower*mult()*(S.quantum?10:1)*(crit?5:1);
+S.score+=gain;S.total+=gain;
+sound(crit?1100:700);
+let d=document.createElement("div");
+d.className="float";d.style.left=e.clientX+"px";d.style.top=e.clientY+"px";
+d.style.color=crit?"gold":accent();d.style.fontSize=crit?"34px":"24px";
+d.innerText=(crit?"CRIT +":"+")+Math.floor(gain);
+document.body.appendChild(d);setTimeout(()=>d.remove(),700);
+
+if(S.clicks===777&&!S.egg){S.egg=true;S.score+=7777;alert("Удача Галактики! +7777 очков!");}
+ui();
+};
+
+setInterval(()=>{S.score+=income()*mult();S.total+=income()*mult();ui();},1000);
+
+function buy(costKey,priceKey,inc){if(S.score>=S[priceKey]){S.score-=S[priceKey];inc();S[priceKey]=Math.floor(S[priceKey]*1.35);ui();}}
+buyClick.onclick=()=>buy("clickPower","cp",()=>S.clickPower++);
+buyAuto.onclick=()=>buy("auto","ap",()=>S.auto++);
+buyShip.onclick=()=>buy("ship","sp",()=>S.ship++);
+buyGen.onclick=()=>buy("clickPower","gp",()=>S.clickPower+=250);
+buyHole.onclick=()=>buy("hole","hp",()=>S.hole++);
+
+prestigeBtn.onclick=()=>{
+if(S.score<1e6)return alert("Нужно 1 000 000 очков");
+if(confirm("Сбросить прогресс ради множителя?")){
+S.score=0;S.clickPower=1;S.auto=0;S.ship=0;S.hole=0;S.cp=50;S.ap=100;S.sp=5000;S.gp=50000;S.hp=500000;S.prestige++;ui();
+}
+};
+
+function buySkin(id,cost){if(!S.skins.includes(id)){if(S.score<cost)return;S.score-=cost;S.skins.push(id);}S.skin=id;ui();}
+skin0.onclick=()=>buySkin(0,0); skin1.onclick=()=>buySkin(1,100000); skin2.onclick=()=>buySkin(2,500000);
+
+music.onclick=()=>{if(bgMusic.paused){bgMusic.play();music.innerText="🔊"}else{bgMusic.pause();music.innerText="🔇"}}
+
+let answer=0,chestTimer;
+function spawnChest(){
+let old=document.getElementById("chest");if(old)old.remove();
+let c=document.createElement("div");c.id="chest";c.textContent="🎁";
+c.style.left=Math.random()*(innerWidth-80)+"px";c.style.top=Math.random()*(innerHeight-80)+"px";
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),15000);
+c.onclick=()=>{
+modal.style.display="flex";
+let a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*20)+1,plus=Math.random()>.5;
+answer=plus?a+b:a-b;task.innerText=`${a} ${plus?"+":"-"} ${b} = ?`;
+let t=10;timer.innerText=t;
+clearInterval(chestTimer);
+chestTimer=setInterval(()=>{timer.innerText=--t;if(t<=0){clearInterval(chestTimer);modal.style.display="none";}},1000);
+open.onclick=()=>{
+clearInterval(chestTimer);
+if(Number(ans.value)===answer){
+if(Math.random()>.5){S.score+=income()*50+5000;alert("Сундук взломан!");}
+else{
+S.quantum=true;coin.classList.add("pulse");stars.classList.add("hyper");
+setTimeout(()=>{S.quantum=false;coin.classList.remove("pulse");stars.classList.remove("hyper");ui();},15000);
+}
+}
+modal.style.display="none";c.remove();ui();
+};
+};
+}
+setInterval(spawnChest,120000);
+ui();
+</script>
+</body>
+</html>
